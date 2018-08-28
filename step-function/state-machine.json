@@ -1,0 +1,108 @@
+{
+    "Comment": "VMware Cloud on AWS AutoDeploy State Machine",
+    "StartAt": "Status",
+    "States": {
+        "Status": {
+            "Type": "Choice",
+            "Choices": [
+                {
+                    "Variable": "$.step.currentStep",
+                    "StringEquals": "createSddc",
+                    "Next": "1a. Create SDDC"
+                },
+                {
+                    "Variable": "$.step.currentStep",
+                    "StringEquals": "checkSddc",
+                    "Next": "1b. Check SDDC"
+                },
+                {
+                    "Variable": "$.step.currentStep",
+                    "StringEquals": "configureFirewall",
+                    "Next": "2a. Create Firewall Rules"
+                },
+                {
+                    "Variable": "$.step.currentStep",
+                    "StringEquals": "checkFirewall",
+                    "Next": "2b. Check Firewall Rules"
+                },
+                {
+                    "Variable": "$.step.currentStep",
+                    "StringEquals": "connectContentLibrary",
+                    "Next": "3a. Connect to Content Library"
+                },
+                {
+                    "Variable": "$.step.currentStep",
+                    "StringEquals": "checkContentLibrary",
+                    "Next": "3b. Check Content Library"
+                },
+                {
+                    "Variable": "$.step.currentStep",
+                    "StringEquals": "deployVM",
+                    "Next": "4a. Deploy VM"
+                },
+                {
+                    "Variable": "$.step.currentStep",
+                    "StringEquals": "checkVM",
+                    "Next": "4b. Check VM"
+                }
+            ],
+            "Default": "5a. Notify"
+        },
+        "1a. Create SDDC": {
+            "Type": "Task",
+            "Resource": "arn:aws:lambda:us-west-2:000000000000:function:VMware-Cloud-on-AWS-AutoDeploy",
+            "TimeoutSeconds": 90,
+            "Next": "1b. Check SDDC"
+        },
+        "1b. Check SDDC": {
+            "Type": "Task",
+            "Resource": "arn:aws:lambda:us-west-2:000000000000:function:VMware-Cloud-on-AWS-AutoDeploy",
+            "Next": "Sleep"
+        },
+        "2a. Create Firewall Rules": {
+            "Type": "Task",
+            "Resource": "arn:aws:lambda:us-west-2:000000000000:function:VMware-Cloud-on-AWS-AutoDeploy",
+            "Next": "2b. Check Firewall Rules"
+        },
+        "2b. Check Firewall Rules": {
+            "Type": "Task",
+            "Resource": "arn:aws:lambda:us-west-2:000000000000:function:VMware-Cloud-on-AWS-AutoDeploy",
+            "Next": "Sleep"
+        },
+        "3a. Connect to Content Library": {
+            "Type": "Task",
+            "Resource": "arn:aws:lambda:us-west-2:000000000000:function:VMware-Cloud-on-AWS-AutoDeploy",
+            "Next": "3b. Check Content Library"
+        },
+        "3b. Check Content Library": {
+            "Type": "Task",
+            "Resource": "arn:aws:lambda:us-west-2:000000000000:function:VMware-Cloud-on-AWS-AutoDeploy",
+            "Next": "Sleep"
+        },
+        "4a. Deploy VM": {
+            "Type": "Task",
+            "Resource": "arn:aws:lambda:us-west-2:000000000000:function:VMware-Cloud-on-AWS-AutoDeploy",
+            "Next": "4b. Check VM"
+        },
+        "4b. Check VM": {
+            "Type": "Task",
+            "Resource": "arn:aws:lambda:us-west-2:000000000000:function:VMware-Cloud-on-AWS-AutoDeploy",
+            "Next": "Sleep"
+        },
+        "5a. Notify": {
+            "Type": "Task",
+            "Resource": "arn:aws:lambda:us-west-2:000000000000:function:VMware-Cloud-on-AWS-AutoDeploy",
+            "Next": "5b. Done"
+        },
+        "Sleep": {
+          "Type": "Wait",
+          "SecondsPath": "$.step.sleepSeconds",
+          "Next": "Status"
+        },
+        "5b. Done": {
+            "Type": "Pass",
+            "End": true
+          
+        }
+    }
+}
