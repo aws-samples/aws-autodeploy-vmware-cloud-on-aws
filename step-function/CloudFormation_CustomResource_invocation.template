@@ -1,0 +1,202 @@
+{
+    "AWSTemplateFormatVersion": "2010-09-09",
+    "Description": "VMware Cloud on AWS AutoDeploy",
+    "Parameters": {
+        "OrgId": {
+            "Default": "your_org_id",
+            "NoEcho": "true",
+            "Description": "VMware Cloud on AWS Organization ID",
+            "Type": "String",
+            "MinLength": "36",
+            "MaxLength": "37",
+            "AllowedPattern": "[a-zA-Z0-9]*-[a-zA-Z0-9]*-[a-zA-Z0-9]*-[a-zA-Z0-9]*-[a-zA-Z0-9]*",
+            "ConstraintDescription": "must contain only hexadecimal and dash characters, 36 characters in length"
+        },
+        "RefreshToken": {
+            "Default": "your_refresh_token",
+            "NoEcho": "true",
+            "Description": "OAuth Refresh Token for your Organization, see https://console.cloud.vmware.com/csp/gateway/portal/#/user/tokens",
+            "Type": "String",
+            "MinLength": "36",
+            "MaxLength": "37",
+            "AllowedPattern": "[a-zA-Z0-9]*-[a-zA-Z0-9]*-[a-zA-Z0-9]*-[a-zA-Z0-9]*-[a-zA-Z0-9]*",
+            "ConstraintDescription": "must contain only hexadecimal and dash characters, 36 characters in length"
+        },
+		"Provider": {
+            "Default": "AWS",
+            "Description": "Deployment Platform Provider",
+            "Type": "String",
+            "MinLength": "1",
+            "MaxLength": "20",
+            "AllowedValues": ["AWS"],
+            "ConstraintDescription": "Deployment Platform Platform"
+        },
+		"SsoDomain": {
+            "Default": "vmc.local",
+            "Description": "VMware Cloud on AWS Organization ID",
+            "Type": "String",
+            "MinLength": "1",
+            "MaxLength": "20",
+            "AllowedValues": ["vmc.local"],
+            "ConstraintDescription": "Deployment Platform"
+        },
+		"Region": {
+            "Default": "AP_SOUTHEAST_2",
+            "Description": "AWS Region",
+            "Type": "String",
+            "AllowedValues": ["US_WEST_2", "US_EAST_1", "AP_SOUTHEAST_2", "EU_CENTRAL_1"]
+        },
+		"VpcCidr": {
+            "Default": "10.80.0.0/16",
+            "Description": "Virtual Private Cloud CIDR block",
+            "Type": "String",
+            "AllowedPattern": "(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})/(\\d{1,2})",
+            "ConstraintDescription": "must be a valid CIDR of the form x.x.x.x/x"
+        },
+		"LinkedSubnets": {
+            "Default": "subnet-00000000000000000",
+            "Description": "Subnets to contain VMware Cloud ENIs in AWS Customer Account",
+            "Type": "String"
+        },
+		"SddcName": {
+		    "Default": "Demo",
+			"Description": "Name of Software Defined Data Center",
+			"MinLength": "1",
+            "MaxLength": "20",
+            "Type": "String"
+		},
+		"VxlanSubnet": {
+            "Default": "192.168.2.0/24",
+            "Description": "SDDC vxLan CIDR block",
+            "Type": "String",
+            "AllowedPattern": "(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})/(\\d{1,2})",
+            "ConstraintDescription": "must be a valid CIDR of the form x.x.x.x/x"
+        },
+		"ManagementCidr": {
+            "Default": "10.83.0.0/16",
+            "Description": "SDDC Management CIDR block",
+            "Type": "String",
+            "AllowedPattern": "(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})/(\\d{1,2})",
+            "ConstraintDescription": "must be a valid CIDR of the form x.x.x.x/x"
+        },
+		"NumHosts": {
+		    "Default": "1",
+			"Description": "Number of Hosts in SDDC",
+            "Type": "String",
+            "AllowedValues": ["1","4"]
+		},
+		"DeploymentType": {
+		    "Default": "SingleAZ",
+			"Description": "Single or Multi-AZ",
+            "Type": "String",
+            "AllowedValues": ["SingleAZ","MultiAZ"]
+		},
+		"Datastore": {
+		    "Default": "WorkloadDatastore",
+			"Description": "Destination Datastore for VMs",
+            "Type": "String",
+            "AllowedValues": ["WorkloadDatastore"]
+		},
+		"ContentLibraryName": {
+		    "Default": "ContentLibrary",
+			"Description": "Label for Content Library",
+            "Type": "String",
+			"MinLength": "1",
+            "MaxLength": "20"
+		},
+		"ContentLibraryURL": {
+		    "Default": "https://s3-us-west-2.amazonaws.com/your-bucket-name/lib.json",
+			"Description": "Content Library URL, must end with lib.json",
+            "Type": "String",
+			"MinLength": "8",
+			"AllowedPattern": "http.*lib.json"
+		},
+		"sslThumbprint": {
+			"Default": "your_ssl_fingerprint",
+			"Description": "SSL fingerprint of Content Library",
+			"Type": "String"
+		},
+		"DnsConfig": {
+			"Default": "10.80.7.227, 10.80.2.145",
+			"Type": "String",
+			"Description": "Comma separated list of DNS resolvers"
+		},
+		"VMname": {
+			"Default": "centos",
+			"Type": "String",
+			"MinLength": "3",
+			"Description": "Test VM hostname"
+		}
+    },
+    "Metadata": {
+        "AWS::CloudFormation::Interface": {
+            "ParameterGroups": [
+                {
+                    "Label": {
+                        "default": "VMware Cloud on AWS portal details"
+                    },
+                    "Parameters": [
+                        "OrgId",
+                        "RefreshToken",
+						"Provider",
+						"SsoDomain"
+                    ]
+                },
+				{
+                    "Label": {
+                        "default": "Connected AWS Customer Account details"
+                    },
+                    "Parameters": [
+                        "Region",
+                        "VpcCidr",
+						"LinkedSubnets"
+                    ]
+                },
+				{
+                    "Label": {
+                        "default": "Software Defined Data Center details"
+                    },
+                    "Parameters": [
+                        "SddcName",
+						"VxlanSubnet",
+						"ManagementCidr",
+						"NumHosts",
+						"DeploymentType",
+						"Datastore",
+						"ContentLibraryName",
+						"ContentLibraryURL",
+						"sslThumbprint",
+						"DnsConfig",
+						"VMname"
+                    ]
+                }
+            ]
+        }
+    },
+    "Resources": {
+        "AutoDeploy": {
+            "Type": "Custom::LambdaCallout",
+            "Properties": {
+				"ServiceToken": "arn:aws:lambda:us-west-2:713002348914:function:VMware-Cloud-on-AWS-AutoDeploy",
+                "OrgId":              { "Ref": "OrgId" },
+				"RefreshToken":       { "Ref": "RefreshToken" },
+				"Provider":           { "Ref": "Provider" },
+				"SsoDomain":          { "Ref": "SsoDomain" },
+				"Region":             { "Ref": "Region" },
+				"VpcCidr":            { "Ref": "VpcCidr" },
+				"LinkedSubnets":       { "Ref": "LinkedSubnets" },
+				"SddcName":           { "Ref": "SddcName" },
+				"VxlanSubnet":        { "Ref": "VxlanSubnet" },
+				"ManagementCidr":     { "Ref": "ManagementCidr" },
+				"NumHosts":           { "Ref": "NumHosts" },
+				"DeploymentType":     { "Ref": "DeploymentType" },
+				"Datastore":          { "Ref": "Datastore" },
+				"ContentLibraryName": { "Ref": "ContentLibraryName" },
+				"ContentLibraryURL":  { "Ref": "ContentLibraryURL" },
+				"sslThumbprint":      { "Ref": "sslThumbprint" },
+                "DnsConfig":          { "Ref": "DnsConfig" },
+				"VMname":             { "Ref": "VMname" }
+            }
+        }
+    }
+} 
