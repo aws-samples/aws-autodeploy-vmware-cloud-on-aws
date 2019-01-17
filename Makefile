@@ -44,8 +44,11 @@ clean:
 	docker rm $(APP_NAME)
 	docker rmi $(APP_NAME)
 	rm -f docker/Dockerfile \
+	    docker/.docker-install-touchfile \
 	    docker/.s3copy-touchfile \
 	    docker/container_volume/$(ZIP_FILE)
+	rm -rf docker/vsphere-automation-sdk-python
+	sudo rm -rf docker/container_volume/__pycache__
 
 docker/.docker-install-touchfile:
 	sudo yum update -y
@@ -68,7 +71,7 @@ docker/Dockerfile: Makefile
 	RUN apt-get update -y
 	RUN apt-get install zip -y
 	RUN pip install -t /lambda --upgrade pip
-	RUN pip install -t /lambda requests retry
+	RUN pip install -t /lambda requests retry tabulate
 	RUN pip install -t /lambda --upgrade \
 	    --force-reinstall \
     	    -r /vsphere-automation-sdk-python/requirements.txt \
