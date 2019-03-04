@@ -280,12 +280,24 @@ class ORG(object):
                 name=sddcName,
                 vxlan_subnet=podConfig.VxlanSubnet,
                 vpc_cidr=podConfig.ManagementCidr,
-                vpc_name=None,
                 provider=self.config.WorkshopConfig.Provider,
                 sso_domain=self.config.WorkshopConfig.SsoDomain,
                 num_hosts=self.config.WorkshopConfig.NumHosts,
                 deployment_type=self.config.WorkshopConfig.DeploymentType,
                 region=self.config.WorkshopConfig.Region)
+
+        # For single node cluster, an extra flag must be set
+        if sddcConfig.num_hosts == 1:
+            sddcConfig.sddc_type = "1NODE"
+
+        # For legacy API/SDK combinations, there was a setting for vpc_name
+        # that was later removed from the prototype.  The following check
+        # ensures backwards compatability
+        try:
+            getattr(sddcConfig, 'vpc_name')
+            sddcConfig.vpc_name = None
+        except AttributeError:
+            pass
 
         if verbose:
             print(sddcConfig)
