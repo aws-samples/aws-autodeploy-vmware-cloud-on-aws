@@ -16,7 +16,9 @@
 
 # portions of this makefile were based from https://gist.github.com/mpneuried/0594963ad38e68917ef189b4e6a269db
 
-APP_NAME = lambda
+ifndef APP_NAME
+        APP_NAME = lambda
+endif
 ZIP_FILE = lambda.zip
 S3_BUCKET_NAME = devint-bryawood-lambda
 S3_OBJECT_NAME = lambda5.zip
